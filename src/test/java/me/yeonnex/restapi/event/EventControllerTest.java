@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -37,7 +35,7 @@ public class EventControllerTest {
     @Test
     @DisplayName("정석대로 이벤트 생성하기")
     void createEvent() throws Exception {
-        EventDto event = EventDto.builder()
+        EventDto eventDto = EventDto.builder()
 //                .id(200)
                 .name("Rest api")
                 .description("Rest api with Spring")
@@ -60,7 +58,7 @@ public class EventControllerTest {
         mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaTypes.HAL_JSON)
-                .content(mapper.writeValueAsString(event)))
+                .content(mapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
 //                .andExpect(header().exists("Location"))
@@ -104,7 +102,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @DisplayName("입력값 유효성 검사")
+    @DisplayName("입력값 유효성 검사 - null 값 주기")
     void createEvent_Bad_Request_Event_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().build();
         this.mockMvc.perform(post("/api/events")
@@ -114,5 +112,28 @@ public class EventControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("입력값 유효성 검사 - 논리적이지 않은 값 주기")
+    void createEvent_Bad_Request_Event_Wrong() throws Exception {
+        EventDto eventDto = EventDto.builder()
+                .name("Rest api")
+                .description("Rest api with Spring")
+                .beginEnrollmentDateTime(LocalDateTime.now())
+                .closeEnrollmentDateTIme(LocalDateTime.now().minusDays(7))
+                .beginEventDateTime(LocalDateTime.now().plusDays(14))
+                .endEventDateTime(LocalDateTime.now().plusDays(7))
+                .basePrice(100000)
+                .maxPrice(200)
+                .location("낙성대 오렌지연필")
+                .limitOfEnrollment(100)
+                .build();
+
+        this.mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(HAL_JSON)
+                .content(mapper.writeValueAsString(eventDto)))
+
+                .andExpect(status().isBadRequest());
+    }
 
 }
