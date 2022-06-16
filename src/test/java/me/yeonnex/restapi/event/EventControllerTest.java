@@ -1,10 +1,13 @@
 package me.yeonnex.restapi.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -18,13 +21,14 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(EventController.class) // 슬라이스 테스트이기때문에, 웹용 빈만 등록해줄 뿐 리포지토리 빈은 등록해주지 않음.
+@SpringBootTest
+@AutoConfigureMockMvc
 public class EventControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     EventRepository eventRepository; // 리포지토리를 모킹하자! 근데, mock 객체이기 때문에 save 를 하더라도 리턴되는 값이 전부  null이다.
 
     @Autowired
@@ -32,13 +36,23 @@ public class EventControllerTest {
     @Test
     void createEvent() throws Exception {
         Event event = Event.builder()
+                .id(200)
                 .name("Rest api")
                 .description("Rest api with Spring")
-                .beginEventDateTime(LocalDateTime.now())
-                .endEventDateTime(LocalDateTime.now())
+                .beginEnrollmentDateTime(LocalDateTime.now())
+                .closeEnrollmentDateTIme(LocalDateTime.now().plusDays(7))
+                .beginEventDateTime(LocalDateTime.now().plusDays(14))
+                .endEventDateTime(LocalDateTime.now().plusDays(21))
+                .basePrice(100)
+                .maxPrice(200)
+                .location("낙성대 오렌지연필")
+                .isFree(true) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
+                .isOffline(false) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
+                .eventStatus(EventStatus.PUBLISHED) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
                 .build();
-        event.setId(24);
-        Mockito.when(eventRepository.save(event)).thenReturn(event);
+
+
+        // Mockito.when(eventRepository.save(event)).thenReturn(event);
 
         mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -51,7 +65,9 @@ public class EventControllerTest {
                 // 타입세이프한 방법
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON_VALUE))
-                .andExpect(jsonPath("id").exists());
+                .andExpect(jsonPath("id").value(Matchers.not(200)))
+                .andExpect(jsonPath("free").value(Matchers.not(true)))
+                .andExpect(jsonPath("eventStatus").value(Matchers.not(EventStatus.PUBLISHED)));
     }
 
 
