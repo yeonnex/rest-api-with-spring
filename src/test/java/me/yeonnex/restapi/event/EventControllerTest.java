@@ -1,6 +1,7 @@
 package me.yeonnex.restapi.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.yeonnex.restapi.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ public class EventControllerTest {
     @Autowired
     ObjectMapper mapper;
     @Test
-    @DisplayName("정석대로 이벤트 생성하기")
+    @TestDescription("정석대로 이벤트 생성하기")
     void createEvent() throws Exception {
         EventDto eventDto = EventDto.builder()
 //                .id(200)
@@ -72,7 +73,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @DisplayName("입력값 이외의 값 추가하여 이벤트 생성 요청")
+    @TestDescription("입력 받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트")
     void createEvent_Bad_Request_Event_Unknown_properties() throws Exception {
         Event event = Event.builder()
                 .id(200) // EventDto 에 없는 필드
@@ -102,7 +103,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @DisplayName("입력값 유효성 검사 - null 값 주기")
+    @TestDescription("입력값이 비어있는 경우에 에러가 발생하는 테스트")
     void createEvent_Bad_Request_Event_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().build();
         this.mockMvc.perform(post("/api/events")
@@ -113,7 +114,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @DisplayName("입력값 유효성 검사 - 논리적이지 않은 값 주기")
+    @TestDescription("입력값이 잘못된 경우에 에러가 발생하는 테스")
     void createEvent_Bad_Request_Event_Wrong() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("Rest api")
