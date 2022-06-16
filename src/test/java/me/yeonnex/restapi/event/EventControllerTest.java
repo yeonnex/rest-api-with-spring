@@ -35,8 +35,8 @@ public class EventControllerTest {
     ObjectMapper mapper;
     @Test
     void createEvent() throws Exception {
-        Event event = Event.builder()
-                .id(200)
+        EventDto event = EventDto.builder()
+//                .id(200)
                 .name("Rest api")
                 .description("Rest api with Spring")
                 .beginEnrollmentDateTime(LocalDateTime.now())
@@ -46,9 +46,10 @@ public class EventControllerTest {
                 .basePrice(100)
                 .maxPrice(200)
                 .location("낙성대 오렌지연필")
-                .isFree(true) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
-                .isOffline(false) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
-                .eventStatus(EventStatus.PUBLISHED) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
+                .limitOfEnrollment(100)
+//                .isFree(true) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
+//                .isOffline(false) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
+//                .eventStatus(EventStatus.PUBLISHED) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
                 .build();
 
 
@@ -68,6 +69,35 @@ public class EventControllerTest {
                 .andExpect(jsonPath("id").value(Matchers.not(200)))
                 .andExpect(jsonPath("free").value(Matchers.not(true)))
                 .andExpect(jsonPath("eventStatus").value(Matchers.not(EventStatus.PUBLISHED)));
+    }
+
+    @Test
+    void createBadEvent() throws Exception {
+        Event event = Event.builder()
+                .id(200) // EventDto 에 없는 필드
+                .name("Rest api")
+                .description("Rest api with Spring")
+                .beginEnrollmentDateTime(LocalDateTime.now())
+                .closeEnrollmentDateTIme(LocalDateTime.now().plusDays(7))
+                .beginEventDateTime(LocalDateTime.now().plusDays(14))
+                .endEventDateTime(LocalDateTime.now().plusDays(21))
+                .basePrice(100)
+                .maxPrice(200)
+                .location("낙성대 오렌지연필")
+                .isFree(true) // EventDto 에 없는 필드
+                .isOffline(false) // EventDto 에 없는 필드
+                .eventStatus(EventStatus.PUBLISHED) // EventDto 에 없는 필드
+                .build();
+
+
+        // Mockito.when(eventRepository.save(event)).thenReturn(event);
+
+        mockMvc.perform(post("/api/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(mapper.writeValueAsString(event)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
 
