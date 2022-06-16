@@ -133,8 +133,37 @@ public class EventControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(HAL_JSON)
                 .content(mapper.writeValueAsString(eventDto)))
-
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("응답 본문에 에러에 대한 정보를 담아 반환")
+    void createEvent_Bad_Request_Event_Return_Body() throws Exception {
+        EventDto eventDto = EventDto.builder()
+                .name("Rest api")
+                .description("Rest api with Spring")
+                .beginEnrollmentDateTime(LocalDateTime.now())
+                .closeEnrollmentDateTIme(LocalDateTime.now().minusDays(7))
+                .beginEventDateTime(LocalDateTime.now().plusDays(14))
+                .endEventDateTime(LocalDateTime.now().plusDays(7))
+                .basePrice(100000)
+                .maxPrice(200)
+                .location("낙성대 오렌지연필")
+                .limitOfEnrollment(100)
+                .build();
+
+        this.mockMvc.perform(post("/api/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(HAL_JSON)
+                        .content(mapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[0].objectName").exists()) // 에러의 "배열" 이 나올 것임.
+                .andExpect(jsonPath("$[0].code").exists())
+                .andExpect(jsonPath("$[0].field").exists())
+                .andExpect(jsonPath("$[0].defaultMessage").exists())
+                .andExpect(jsonPath("$[0].rejectedValue").exists())
+        ;
+    }
 }
