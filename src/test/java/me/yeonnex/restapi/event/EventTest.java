@@ -1,9 +1,17 @@
 package me.yeonnex.restapi.event;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@RunWith(JUnitParamsRunner.class)
 class EventTest {
     @Test
     void builder(){
@@ -29,4 +37,35 @@ class EventTest {
         assertThat(event.getDescription()).isEqualTo(name);
         assertThat(event.getName()).isEqualTo(description);
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 0, true",
+            "0, 100, false",
+            "100, 0, false",
+    })
+    @DisplayName("Event 엔티티에서 비즈니스 로직 점검 - price")
+    void testFree(int basePrice, int maxPrice, boolean isFree){
+        // Given
+        Event event = Event.builder()
+                .basePrice(basePrice)
+                .maxPrice(maxPrice).build();
+
+        // When
+        event.update();
+
+        // Then
+        assertThat(event.isFree()).isEqualTo(isFree);
+    }
+    @Test
+    @DisplayName("Event 엔티티에서 비즈니스 로직 점검 - Offline")
+    void testOffline(){
+        Event event = Event.builder()
+                .location("숭실대학교 정보과학관 506호")
+                .build();
+        event.update();
+        assertThat(event.isOffline()).isTrue();
+    }
+
+
 }
