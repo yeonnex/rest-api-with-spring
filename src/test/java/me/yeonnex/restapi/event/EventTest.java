@@ -1,14 +1,11 @@
 package me.yeonnex.restapi.event;
 
 import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -62,14 +59,22 @@ class EventTest {
                 new Object[] {100, 200, false}
         };
     }
-    @Test
+    @ParameterizedTest
+    @MethodSource("parametersForTestOffline")
     @DisplayName("Event 엔티티에서 비즈니스 로직 점검 - Offline")
-    void testOffline(){
+    void testOffline(String location, Boolean isOffline){
         Event event = Event.builder()
-                .location("숭실대학교 정보과학관 506호")
+                .location(location)
                 .build();
         event.update();
-        assertThat(event.isOffline()).isTrue();
+        assertThat(event.isOffline()).isEqualTo(isOffline);
+    }
+
+    private static Object[] parametersForTestOffline(){
+        return new Object[] {
+                new Object[] {"숭실대학교 정보과학관 506호", true},
+                new Object[] {null, false}
+        };
     }
 
 
