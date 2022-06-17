@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -39,11 +40,7 @@ class EventTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "0, 0, true",
-            "0, 100, false",
-            "100, 0, false",
-    })
+    @MethodSource("paramsForTestFree")
     @DisplayName("Event 엔티티에서 비즈니스 로직 점검 - price")
     void testFree(int basePrice, int maxPrice, boolean isFree){
         // Given
@@ -56,6 +53,14 @@ class EventTest {
 
         // Then
         assertThat(event.isFree()).isEqualTo(isFree);
+    }
+
+    private static Object[] paramsForTestFree(){
+        return new Object[] {
+                new Object[] {0, 0, true},
+                new Object[] {100, 0, false},
+                new Object[] {100, 200, false}
+        };
     }
     @Test
     @DisplayName("Event 엔티티에서 비즈니스 로직 점검 - Offline")
