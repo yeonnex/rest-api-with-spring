@@ -37,7 +37,6 @@ public class EventControllerTest {
     @TestDescription("정석대로 이벤트 생성하기")
     void createEvent() throws Exception {
         EventDto eventDto = EventDto.builder()
-//                .id(200)
                 .name("Rest api")
                 .description("Rest api with Spring")
                 .beginEnrollmentDateTime(LocalDateTime.now())
@@ -48,13 +47,9 @@ public class EventControllerTest {
                 .maxPrice(200)
                 .location("낙성대 오렌지연필")
                 .limitOfEnrollment(100)
-//                .isFree(true) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
-//                .isOffline(false) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
-//                .eventStatus(EventStatus.PUBLISHED) // 말이 안되는 값. Dto 사용함으로써 백에서 걸러줄 것.
                 .build();
 
 
-        // Mockito.when(eventRepository.save(event)).thenReturn(event);
 
         mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -62,14 +57,15 @@ public class EventControllerTest {
                 .content(mapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-//                .andExpect(header().exists("Location"))
-//                .andExpect(header().string("Content-Type", "application/hal+json"))
-                // 타입세이프한 방법
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON_VALUE))
                 .andExpect(jsonPath("id").value(Matchers.not(200)))
                 .andExpect(jsonPath("free").value(Matchers.not(true)))
-                .andExpect(jsonPath("eventStatus").value(Matchers.not(EventStatus.PUBLISHED)));
+                .andExpect(jsonPath("eventStatus").value(Matchers.not(EventStatus.PUBLISHED)))
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
+        ;
     }
 
     @Test
