@@ -20,10 +20,12 @@ import java.time.LocalDateTime;
 
 import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -72,12 +74,49 @@ public class EventControllerTest {
                 .andExpect(jsonPath("eventStatus").value(Matchers.not(EventStatus.PUBLISHED)))
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect(jsonPath("_links.update-event").exists())
+                .andExpect( jsonPath("_links.update-event").exists())
                 .andDo(document("create-event",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-events").description("link to query events"),
                                 linkWithRel("update-event").description("link to update an existring event")
+                        ),
+                        requestHeaders(
+                    headerWithName(HttpHeaders.ACCEPT).description("access header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type")
+                        ),
+                        requestFields(
+                                fieldWithPath("name").description(" Name of new event"),
+                                fieldWithPath("description").description("Description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime"). description("Begin date of enrollment"),
+                                fieldWithPath("beginEventDateTime").description("Begin Date of event"),
+                                fieldWithPath("endEventDateTime").description("End Date of event"),
+                                fieldWithPath("location").description("Location of event"),
+                                fieldWithPath("closeEnrollmentDateTIme").description("Close date of enrollment"),
+                                fieldWithPath("basePrice").description("Base Price of event"),
+                                fieldWithPath("maxPrice").description("Max Price of event"),
+                                fieldWithPath("limitOfEnrollment").description("Limit number of enrollment")
+                        ),
+                        // 응답헤더 문서화
+                        responseHeaders(
+                    headerWithName(HttpHeaders.LOCATION).description("Location header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type")
+                        ),
+                        relaxedResponseFields( // 그냥 responseFields 는 아주 엄격하게 응답으로 오는 모든 값에 대해 써주어야 했지만, "relaxed"ResponseFields 는 그 중 일부만 적어주어도 되는 편리함 제공.
+                    fieldWithPath("id").description(" Identifier of new event"),
+                                fieldWithPath("name").description(" Name of new event"),
+                                fieldWithPath("description").description("Description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime"). description("Begin date of enrollment"),
+                                fieldWithPath("beginEventDateTime").description("Begin Date of event"),
+                                fieldWithPath("endEventDateTime").description("End Date of event"),
+                                fieldWithPath("location").description("Location of event"),
+                                fieldWithPath("closeEnrollmentDateTIme").description("Close date of enrollment"),
+                                fieldWithPath("basePrice").description("Base Price of event"),
+                                fieldWithPath("maxPrice").description("Max Price of event"),
+                                fieldWithPath("limitOfEnrollment").description("Limit number of enrollment"),
+                                fieldWithPath("free").description("It tells is this event free or not"),
+                                fieldWithPath("offline").description("It tells is this event offline or not"),
+                                fieldWithPath("eventStatus").description("It tells is this event offline or not")
                         )
                 ))
         ;
