@@ -1,6 +1,7 @@
 package me.yeonnex.restapi.event;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -48,6 +49,8 @@ public class EventController {
         eventResource.add(linkTo(EventController.class).withRel("query-events"));
         eventResource.add(linkTo(EventController.class).slash(newEvent.getId()).withSelfRel());
         eventResource.add(linkTo(EventController.class).slash(newEvent.getId()).withRel("update-event"));
+        eventResource.add(Link.of("http://localhost:8080/docs/index.html#resources-events-create").withRel("profile"));
+
         return ResponseEntity.created(uri).body(eventResource);
     }
 }

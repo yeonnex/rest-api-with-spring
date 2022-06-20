@@ -74,12 +74,13 @@ public class EventControllerTest {
                 .andExpect(jsonPath("eventStatus").value(Matchers.not(EventStatus.PUBLISHED)))
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect( jsonPath("_links.update-event").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
                 .andDo(document("create-event",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-events").description("link to query events"),
-                                linkWithRel("update-event").description("link to update an existring event")
+                                linkWithRel("update-event").description("link to update an existing event"),
+                                linkWithRel("profile").description("link to profile")
                         ),
                         requestHeaders(
                     headerWithName(HttpHeaders.ACCEPT).description("access header"),
@@ -117,6 +118,7 @@ public class EventControllerTest {
                                 fieldWithPath("free").description("It tells is this event free or not"),
                                 fieldWithPath("offline").description("It tells is this event offline or not"),
                                 fieldWithPath("eventStatus").description("It tells is this event offline or not")
+                                // 링크정보들" 위에서 이미 따로 해주었으므로 생략함
                         )
                 ))
         ;
